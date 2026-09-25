@@ -2,6 +2,9 @@
 /*-questions.csv
 /*-questions.md
 
+# Отчёт по ДЗ (DOCX, PDF и всё для его сборки) — сдаётся отдельно
+report/
+
 # Зависимости и сборка
 node_modules/
 dist/
