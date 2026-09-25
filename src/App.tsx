@@ -38,7 +38,9 @@ export function App() {
           />
         )}
         {screen === 'quiz' && (
+          // key: каждый вопрос — новый экран, от предыдущего не остаётся ни фото, ни анимаций
           <QuestionScreen
+            key={steps[step].question.id}
             step={steps[step]}
             selected={answers[steps[step].question.id] ?? []}
             onToggle={(optionId) => dispatch({ type: 'toggle', optionId })}

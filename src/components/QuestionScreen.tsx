@@ -33,9 +33,9 @@ export function QuestionScreen({ step, selected, onToggle, onNext, onBack }: Que
 
   return (
     <form className="question" onSubmit={submit}>
-      <Photo key={question.id} name={question.image} className="question__photo" eager />
+      <Photo name={question.image} className="question__photo" eager />
 
-      <div key={question.id} className="question__content">
+      <div className="question__content">
         <div className="progress">
           <div className="progress__meta">
             <span>
