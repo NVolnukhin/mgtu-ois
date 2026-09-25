@@ -7,15 +7,16 @@ interface StartScreenProps {
   answered: number;
   onStart: () => void;
   onResume: () => void;
+  onOpenKnowledgeBase: () => void;
 }
 
 const HOW_IT_WORKS = [
-  'Ответь на 20 вопросов о мотивах, опыте и характере. В одних вопросах можно выбрать один ответ, в других — несколько.',
-  'Каждый ответ добавляет баллы направлениям. Веса расставлены по смыслу ответов и проверены на тестовых анкетах.',
-  'В конце ты увидишь направление, которое подходит тебе больше всего, и объяснение, почему именно оно.',
+  `Ответь на ${steps.length} вопроса о мотивах, опыте и характере. В одних вопросах можно выбрать один ответ, в других — несколько. Если ответ на вопрос следует из предыдущих, система выведет его сама и не станет спрашивать.`,
+  `Каждый ответ даёт «преимущество» свойствам деятельности, и после каждого ответа система пересчитывает рейтинг ${quiz.objects.length} видов волонтёрской деятельности.`,
+  'В конце ты увидишь свою направленность, все виды деятельности по рангу и объяснение, почему лидеры тебе подходят.',
 ];
 
-export function StartScreen({ answered, onStart, onResume }: StartScreenProps) {
+export function StartScreen({ answered, onStart, onResume, onOpenKnowledgeBase }: StartScreenProps) {
   const hasProgress = answered > 0;
 
   return (
@@ -28,6 +29,7 @@ export function StartScreen({ answered, onStart, onResume }: StartScreenProps) {
           <ul className="facts" aria-label="Коротко о тесте">
             <li>{plural(steps.length, ['вопрос', 'вопроса', 'вопросов'])}</li>
             <li>≈ {plural(quiz.estimatedMinutes, ['минута', 'минуты', 'минут'])}</li>
+            <li>{plural(quiz.objects.length, ['вид деятельности', 'вида деятельности', 'видов деятельности'])}</li>
             <li>{plural(quiz.directions.length, ['направление', 'направления', 'направлений'])}</li>
           </ul>
           <div className="actions">
@@ -75,6 +77,13 @@ export function StartScreen({ answered, onStart, onResume }: StartScreenProps) {
             <li key={text}>{text}</li>
           ))}
         </ol>
+        <p className="note">
+          Это прототип экспертной системы: её база знаний открыта —{' '}
+          <button type="button" className="text-button text-button--inline" onClick={onOpenKnowledgeBase}>
+            посмотреть объекты, атрибуты и правила
+          </button>
+          .
+        </p>
       </section>
     </div>
   );

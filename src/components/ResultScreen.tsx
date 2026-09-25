@@ -1,18 +1,21 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { breakdown } from '../engine/scoring.ts';
-import type { Evaluation } from '../engine/scoring.ts';
+import { breakdown, SPHERE_WEIGHT } from '../engine/scoring.ts';
+import type { Evaluation, ObjectScore } from '../engine/scoring.ts';
+import { ATTRIBUTE_IDS } from '../engine/types.ts';
 import type { Answers } from '../engine/types.ts';
-import { quiz } from '../data.ts';
+import { attributeById, directionById, preferencePercent, quiz, signedPercent } from '../data.ts';
 import { Photo } from './Photo.tsx';
+import { RankingList } from './RankingList.tsx';
 
 interface ResultScreenProps {
   evaluation: Evaluation;
   answers: Answers;
   onRestart: () => void;
+  onOpenWorkingMemory: () => void;
 }
 
-export function ResultScreen({ evaluation, answers, onRestart }: ResultScreenProps) {
-  const { winner, runnerUp, ranking, isClose, isWeak, reasons } = evaluation;
+export function ResultScreen({ evaluation, answers, onRestart, onOpenWorkingMemory }: ResultScreenProps) {
+  const { winner, runnerUp, ranking, isClose, isWeak, reasons, objects } = evaluation;
   const { direction } = winner;
   const titleRef = useRef<HTMLHeadingElement>(null);
   const rows = useMemo(() => breakdown(quiz, answers), [answers]);
@@ -25,7 +28,7 @@ export function ResultScreen({ evaluation, answers, onRestart }: ResultScreenPro
     <article className="result">
       <header className="result__hero">
         <div className="result__intro">
-          <p className="eyebrow">Твоё направление</p>
+          <p className="eyebrow">Твоя направленность</p>
           <h1 ref={titleRef} tabIndex={-1} className="result__title">
             {direction.title}
           </h1>
@@ -37,14 +40,14 @@ export function ResultScreen({ evaluation, answers, onRestart }: ResultScreenPro
               <span className="score__unit">%</span>
             </p>
             <p className="score__caption">
-              совпадение с направлением — {winner.points} из {winner.max} возможных баллов
+              совпадение со сферой — {winner.points} из {winner.max} возможных баллов
             </p>
           </div>
 
           {isWeak && (
             <p className="callout">
-              Склонность пока выражена слабо: даже самое подходящее направление набрало меньше половины баллов.
-              Попробуй разные направления на разовых акциях — так станет понятнее, что откликается именно тебе.
+              Склонность пока выражена слабо: даже самая близкая сфера набрала меньше половины баллов. Попробуй разные
+              направления на разовых акциях — так станет понятнее, что откликается именно тебе.
             </p>
           )}
           {isClose && (
@@ -57,11 +60,20 @@ export function ResultScreen({ evaluation, answers, onRestart }: ResultScreenPro
         <Photo name={direction.image} className="result__photo" eager />
       </header>
 
+      <section className="section">
+        <h2 className="section__title">Лучше всего тебе подходят</h2>
+        <ol className="top-cards">
+          {objects.slice(0, 3).map((item) => (
+            <TopCard key={item.object.id} item={item} />
+          ))}
+        </ol>
+      </section>
+
       <div className="result__body">
         <div className="result__main">
           {reasons.length > 0 && (
             <section className="section">
-              <h2 className="section__title">Почему оно тебе подходит</h2>
+              <h2 className="section__title">Почему у тебя такая направленность</h2>
               <ul className="reasons">
                 {reasons.map((reason) => (
                   <li key={`${reason.questionId}:${reason.text}`}>{reason.text}</li>
@@ -71,14 +83,16 @@ export function ResultScreen({ evaluation, answers, onRestart }: ResultScreenPro
           )}
 
           <section className="section">
+            <h2 className="section__title">Все виды деятельности по рангу</h2>
+            <p className="section__lead">
+              Совпадение — это сходство твоего профиля предпочтений с профилем деятельности, от −100 % до 100 %.
+            </p>
+            <RankingList items={objects} />
+          </section>
+
+          <section className="section">
             <h2 className="section__title">О направлении</h2>
             <p className="result__text">{direction.description}</p>
-            <h3 className="result__subtitle">Чем занимаются волонтёры</h3>
-            <ul className="list">
-              {direction.activities.map((activity) => (
-                <li key={activity}>{activity}</li>
-              ))}
-            </ul>
             <h3 className="result__subtitle">Что пригодится</h3>
             <ul className="chips">
               {direction.qualities.map((quality) => (
@@ -114,25 +128,41 @@ export function ResultScreen({ evaluation, answers, onRestart }: ResultScreenPro
 
             <details className="details">
               <summary className="details__summary">Как считается результат</summary>
-              <p className="details__text">
-                Каждый вариант ответа даёт каждому направлению от 0 до 3 баллов: 3 — сильный признак, 0 — связи нет.
-                Баллы выбранных вариантов складываются, сумма делится на максимум — у всех направлений он одинаковый,{' '}
-                {winner.max} баллов. Побеждает направление с наибольшим процентом.
-              </p>
+              <div className="details__text">
+                <p>
+                  Каждый ответ даёт «преимущество» атрибутам: сферам (дети, инклюзия, старшие, экология) и стилю
+                  деятельности (нагрузка, регулярность, лидерство и другие). Из сумм получается профиль предпочтений: по
+                  каждому из {quiz.attributes.length} атрибутов — где сумма лежит между наименьшей и наибольшей возможной,
+                  от 0 до 100 %.
+                </p>
+                <p>
+                  Профиль сравнивается с атрибутами каждого из {quiz.objects.length} видов деятельности (косинусная мера
+                  сходства, сферы с весом {SPHERE_WEIGHT}) — так получается рейтинг. Направленность — это сфера, по которой
+                  набрано больше всего баллов из {winner.max} возможных.
+                </p>
+              </div>
+              <button type="button" className="text-button" onClick={onOpenWorkingMemory}>
+                Открыть рабочую базу данных
+              </button>
               <ol className="breakdown">
-                {rows.map(({ question, selected, points }, i) => {
-                  const gained = quiz.directions.filter((d) => points[d.id] > 0);
+                {rows.map(({ question, selected, points, rule }, i) => {
+                  const gained = ATTRIBUTE_IDS.filter((id) => points[id] !== 0);
                   return (
                     <li key={question.id} className="breakdown__item">
                       <p className="breakdown__question">
-                        {i + 1}. {question.text}
+                        {i + 1}. {question.parameter}
+                        {rule && <span className="breakdown__rule"> · выведено правилом {rule.title}</span>}
                       </p>
                       <p className="breakdown__answer">{selected.map((option) => option.text).join('; ')}</p>
                       <p className="breakdown__points">
                         {gained.length > 0
-                          ? gained.map((d) => (
-                              <span key={d.id} className={d.id === direction.id ? 'point point--winner' : 'point'}>
-                                {d.short} +{points[d.id]}
+                          ? gained.map((id) => (
+                              <span
+                                key={id}
+                                className={id === direction.id ? 'point point--winner' : points[id] < 0 ? 'point point--minus' : 'point'}
+                              >
+                                {attributeById[id].short} {points[id] > 0 ? '+' : '−'}
+                                {Math.abs(points[id])}
                               </span>
                             ))
                           : 'Баллов не даёт'}
@@ -152,5 +182,45 @@ export function ResultScreen({ evaluation, answers, onRestart }: ResultScreenPro
         </button>
       </div>
     </article>
+  );
+}
+
+/** Карточка лидера рейтинга: что совпадает с профилем и что нет. */
+function TopCard({ item }: { item: ObjectScore }) {
+  const matches = item.contributions.filter((c) => c.value > 0).slice(0, 3);
+  const conflicts = item.contributions
+    .filter((c) => c.value < 0)
+    .sort((a, b) => a.value - b.value)
+    .slice(0, 2);
+  return (
+    <li className="top-card">
+      <div className="top-card__head">
+        <span className="top-card__rank">{item.rank}</span>
+        <span className="top-card__score">{signedPercent(item.score)}</span>
+      </div>
+      <h3 className="top-card__title">{item.object.title}</h3>
+      <p className="top-card__direction">{directionById[item.object.direction].title}</p>
+      <p className="top-card__text">{item.object.description}</p>
+      {matches.length > 0 && (
+        <p className="top-card__line">
+          <span className="top-card__label">Совпадает:</span>
+          {matches.map((c) => (
+            <span key={c.attribute} className="point point--plus">
+              {attributeById[c.attribute].short} {preferencePercent(c.preference)}
+            </span>
+          ))}
+        </p>
+      )}
+      {conflicts.length > 0 && (
+        <p className="top-card__line">
+          <span className="top-card__label">Не совпадает:</span>
+          {conflicts.map((c) => (
+            <span key={c.attribute} className="point point--minus">
+              {attributeById[c.attribute].short} {preferencePercent(c.preference)}
+            </span>
+          ))}
+        </p>
+      )}
+    </li>
   );
 }

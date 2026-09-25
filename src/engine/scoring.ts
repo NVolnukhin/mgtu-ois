@@ -1,8 +1,23 @@
-// Механизм вывода: считает баллы по направлениям, выбирает подходящее и объясняет выбор.
+// Механизм логического вывода экспертной системы.
+//   1. Правила «параметр + параметр» выводят значения части параметров из ответов пользователя.
+//   2. Связи «параметр + атрибут» превращают ответы в профиль предпочтений по 13 атрибутам.
+//   3. Объекты ранжируются по совпадению своих атрибутов с профилем, а атрибуты-сферы профиля
+//      дают итоговую направленность.
 // Файл без зависимостей от React, чтобы его можно было запускать из скриптов проверки.
 
-import { DIRECTION_IDS } from './types.ts';
-import type { Answers, Direction, DirectionId, Option, Question, Quiz, Weights } from './types.ts';
+import { ATTRIBUTE_IDS } from './types.ts';
+import type {
+  Answers,
+  AttributeId,
+  AttributeValues,
+  Direction,
+  DirectionId,
+  Option,
+  Question,
+  Quiz,
+  Rule,
+  VolunteerObject,
+} from './types.ts';
 
 /** Если даже лучшее направление набрало меньше этого процента, выраженной склонности нет. */
 export const WEAK_PERCENT = 50;
@@ -10,32 +25,22 @@ export const WEAK_PERCENT = 50;
 /** Если второе место отстаёт меньше чем на столько процентных пунктов, оно почти равно первому. */
 export const CLOSE_GAP = 10;
 
-export function zeroWeights(): Weights {
-  return Object.fromEntries(DIRECTION_IDS.map((id) => [id, 0])) as Weights;
+/** Сколько лучших объектов показывать после каждого ответа. */
+export const TOP_COUNT = 5;
+
+/** Вес атрибутов-сфер в сравнении с объектами: сфера важнее отдельной черты стиля. */
+export const SPHERE_WEIGHT = 2;
+
+export function zeroValues(): AttributeValues {
+  return Object.fromEntries(ATTRIBUTE_IDS.map((id) => [id, 0])) as AttributeValues;
+}
+
+export function weight(option: Option, attribute: AttributeId): number {
+  return option.weights[attribute] ?? 0;
 }
 
 export function allQuestions(quiz: Quiz): Question[] {
   return quiz.blocks.flatMap((block) => block.questions);
-}
-
-/**
- * Сколько вопрос максимально может дать направлению: в вопросе с одним ответом —
- * наибольший вес среди вариантов, с несколькими — сумма всех весов.
- */
-export function questionMax(question: Question, direction: DirectionId): number {
-  const weights = question.options.map((option) => option.weights[direction]);
-  return question.type === 'single'
-    ? Math.max(...weights)
-    : weights.reduce((sum, weight) => sum + weight, 0);
-}
-
-/** M — максимальная сумма баллов по каждому направлению. */
-export function maxScores(quiz: Quiz): Weights {
-  const max = zeroWeights();
-  for (const question of allQuestions(quiz)) {
-    for (const id of DIRECTION_IDS) max[id] += questionMax(question, id);
-  }
-  return max;
 }
 
 export function selectedOptions(question: Question, answers: Answers): Option[] {
@@ -56,38 +61,188 @@ export function toggleOption(question: Question, selected: string[], optionId: s
   return [...selected.filter((id) => !exclusive.has(id)), optionId];
 }
 
-export function isComplete(quiz: Quiz, answers: Answers): boolean {
-  return allQuestions(quiz).every((question) => selectedOptions(question, answers).length > 0);
+// ---------- 1. Правила «параметр + параметр» ----------
+
+export interface Inference {
+  /** Ответы пользователя вместе с выведенными значениями — рабочая база данных. */
+  answers: Answers;
+  /** id вопроса → правило, которым выведено значение. Эти вопросы пользователю не задаются. */
+  inferred: Map<string, Rule>;
 }
 
-/** Сумма весов отмеченных вариантов по каждому направлению. */
-export function scoreAnswers(quiz: Quiz, answers: Answers, blocks = quiz.blocks): Weights {
-  const score = zeroWeights();
-  for (const block of blocks) {
-    for (const question of block.questions) {
-      for (const option of selectedOptions(question, answers)) {
-        for (const id of DIRECTION_IDS) score[id] += option.weights[id];
-      }
+/**
+ * Прямой вывод: пока есть правило, условие которого выполнено, а заключение ещё не выведено,
+ * применяем его. Выведенное значение заменяет ответ пользователя на тот же вопрос, если он был
+ * (например, пользователь вернулся назад и изменил ответ-условие).
+ */
+export function infer(quiz: Quiz, answers: Answers): Inference {
+  const effective: Answers = { ...answers };
+  const inferred = new Map<string, Rule>();
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const rule of quiz.rules) {
+      if (inferred.has(rule.then.question)) continue;
+      if (!(effective[rule.if.question] ?? []).includes(rule.if.option)) continue;
+      effective[rule.then.question] = [rule.then.option];
+      inferred.set(rule.then.question, rule);
+      changed = true;
     }
   }
-  return score;
+  return { answers: effective, inferred };
+}
+
+/** Вопросы, которые задаются пользователю: все, кроме выведенных правилами. */
+export function askedQuestions(quiz: Quiz, answers: Answers): Question[] {
+  const { inferred } = infer(quiz, answers);
+  return allQuestions(quiz).filter((question) => !inferred.has(question.id));
+}
+
+/** Все параметры получены: от пользователя или выведены правилами. */
+export function isComplete(quiz: Quiz, answers: Answers): boolean {
+  const { answers: effective } = infer(quiz, answers);
+  return allQuestions(quiz).every((question) => selectedOptions(question, effective).length > 0);
+}
+
+// ---------- 2. Связи «параметр + атрибут»: профиль предпочтений ----------
+
+/**
+ * Наименьшая и наибольшая сумма, которую вопрос может дать атрибуту: в вопросе с одним ответом —
+ * наименьший и наибольший вес среди вариантов, с несколькими — сумма отрицательных и сумма положительных.
+ */
+export function questionBounds(question: Question, attribute: AttributeId): [number, number] {
+  const weights = question.options.map((option) => weight(option, attribute));
+  if (question.type === 'single') return [Math.min(...weights), Math.max(...weights)];
+  return [
+    weights.filter((w) => w < 0).reduce((sum, w) => sum + w, 0),
+    weights.filter((w) => w > 0).reduce((sum, w) => sum + w, 0),
+  ];
+}
+
+export interface Profile {
+  /** Сумма весов выбранных вариантов по каждому атрибуту. */
+  points: AttributeValues;
+  /** Наименьшая и наибольшая возможная сумма по уже полученным параметрам. */
+  low: AttributeValues;
+  high: AttributeValues;
+  /**
+   * Предпочтение от −1 до 1: где сумма оказалась между наименьшей и наибольшей возможной.
+   * −1 — все ответы против атрибута, 1 — все за, 0 — поровну или данных пока нет.
+   */
+  preference: AttributeValues;
+}
+
+export function buildProfile(quiz: Quiz, effective: Answers, questions = allQuestions(quiz)): Profile {
+  const points = zeroValues();
+  const low = zeroValues();
+  const high = zeroValues();
+  const preference = zeroValues();
+  for (const question of questions) {
+    const chosen = selectedOptions(question, effective);
+    if (chosen.length === 0) continue;
+    for (const id of ATTRIBUTE_IDS) {
+      const [min, max] = questionBounds(question, id);
+      low[id] += min;
+      high[id] += max;
+      for (const option of chosen) points[id] += weight(option, id);
+    }
+  }
+  for (const id of ATTRIBUTE_IDS) {
+    const span = high[id] - low[id];
+    preference[id] = span > 0 ? (2 * (points[id] - low[id])) / span - 1 : 0;
+  }
+  return { points, low, high, preference };
+}
+
+// ---------- 3. Ранжирование объектов ----------
+
+export interface Contribution {
+  attribute: AttributeId;
+  /** Выраженность атрибута у объекта, 0–3. */
+  level: number;
+  /** Предпочтение пользователя по атрибуту, от −1 до 1. */
+  preference: number;
+  /** Вклад атрибута в совпадение; сумма вкладов равна совпадению. */
+  value: number;
+}
+
+export interface ObjectScore {
+  object: VolunteerObject;
+  /** Совпадение от −1 до 1 — косинус угла между профилем пользователя и атрибутами объекта. */
+  score: number;
+  /** Место в рейтинге, начиная с 1. */
+  rank: number;
+  /** Вклад атрибутов, от самого большого к самому маленькому. */
+  contributions: Contribution[];
+}
+
+export function attributeWeight(quiz: Quiz, id: AttributeId): number {
+  return quiz.attributes.find((a) => a.id === id)?.group === 'sphere' ? SPHERE_WEIGHT : 1;
+}
+
+/**
+ * Совпадение объекта с профилем — косинусная мера сходства векторов: предпочтений пользователя
+ * (от −1 до 1) и выраженности атрибутов объекта (от 0 до 3), где сферы идут с весом SPHERE_WEIGHT.
+ * 1 — профиль деятельности в точности повторяет предпочтения, 0 — не связан с ними,
+ * отрицательное значение — свойства деятельности противоречат ответам.
+ */
+export function rankObjects(quiz: Quiz, preference: AttributeValues): ObjectScore[] {
+  const w = Object.fromEntries(ATTRIBUTE_IDS.map((id) => [id, attributeWeight(quiz, id)])) as AttributeValues;
+  const preferenceNorm = Math.sqrt(ATTRIBUTE_IDS.reduce((sum, id) => sum + w[id] * preference[id] ** 2, 0));
+  const scored = quiz.objects.map((object) => {
+    const objectNorm = Math.sqrt(ATTRIBUTE_IDS.reduce((sum, id) => sum + w[id] * object.attributes[id] ** 2, 0));
+    const norm = preferenceNorm * objectNorm;
+    const contributions = ATTRIBUTE_IDS.filter((id) => object.attributes[id] > 0).map((id) => ({
+      attribute: id,
+      level: object.attributes[id],
+      preference: preference[id],
+      value: norm > 0 ? (w[id] * preference[id] * object.attributes[id]) / norm : 0,
+    }));
+    const score = contributions.reduce((sum, c) => sum + c.value, 0);
+    contributions.sort((a, b) => b.value - a.value);
+    return { object, score, rank: 0, contributions };
+  });
+  // При равенстве остаётся порядок объектов в базе знаний (сортировка стабильная).
+  scored.sort((a, b) => b.score - a.score);
+  scored.forEach((item, index) => (item.rank = index + 1));
+  return scored;
+}
+
+/** Рейтинг объектов по текущим ответам — то, что показывается после каждого ответа. */
+export function liveRanking(quiz: Quiz, answers: Answers): ObjectScore[] {
+  const { answers: effective } = infer(quiz, answers);
+  return rankObjects(quiz, buildProfile(quiz, effective).preference);
+}
+
+// ---------- Итог: направленность ----------
+
+/** M — максимальная сумма баллов по каждому атрибуту при ответах на все вопросы. */
+export function maxScores(quiz: Quiz): AttributeValues {
+  const max = zeroValues();
+  for (const question of allQuestions(quiz)) {
+    for (const id of ATTRIBUTE_IDS) max[id] += questionBounds(question, id)[1];
+  }
+  return max;
 }
 
 export interface QuestionBreakdown {
   question: Question;
   selected: Option[];
-  points: Weights;
+  points: AttributeValues;
+  /** Правило, которым выведено значение; у ответов пользователя его нет. */
+  rule?: Rule;
 }
 
-/** Сколько баллов каждый ответ дал каждому направлению — для подробного расчёта на экране результата. */
+/** Сколько баллов каждый параметр дал каждому атрибуту — для подробного расчёта. */
 export function breakdown(quiz: Quiz, answers: Answers): QuestionBreakdown[] {
+  const { answers: effective, inferred } = infer(quiz, answers);
   return allQuestions(quiz).map((question) => {
-    const selected = selectedOptions(question, answers);
-    const points = zeroWeights();
+    const selected = selectedOptions(question, effective);
+    const points = zeroValues();
     for (const option of selected) {
-      for (const id of DIRECTION_IDS) points[id] += option.weights[id];
+      for (const id of ATTRIBUTE_IDS) points[id] += weight(option, id);
     }
-    return { question, selected, points };
+    return { question, selected, points, rule: inferred.get(question.id) };
   });
 }
 
@@ -118,21 +273,27 @@ export interface Evaluation {
   isWeak: boolean;
   /** Самые весомые ответы в пользу победившего направления. */
   reasons: Reason[];
+  /** Все объекты по рангу. */
+  objects: ObjectScore[];
+  profile: Profile;
+  inferred: Map<string, Rule>;
 }
 
 export function evaluate(quiz: Quiz, answers: Answers): Evaluation {
-  const points = scoreAnswers(quiz, answers);
+  const { answers: effective, inferred } = infer(quiz, answers);
+  const profile = buildProfile(quiz, effective);
   const max = maxScores(quiz);
-  const general = scoreAnswers(quiz, answers, quiz.blocks.filter((block) => !block.direction));
+  const generalQuestions = quiz.blocks.filter((block) => !block.direction).flatMap((block) => block.questions);
+  const general = buildProfile(quiz, effective, generalQuestions).points;
 
   // Больший процент выигрывает; при равенстве — больше баллов в общем блоке (там человек
-  // сам выбирает между направлениями); дальше — порядок направлений в контенте (сортировка стабильная).
+  // сам выбирает между сферами); дальше — порядок направлений в базе знаний (сортировка стабильная).
   const ranking = quiz.directions
     .map((direction) => ({
       direction,
-      points: points[direction.id],
+      points: profile.points[direction.id],
       max: max[direction.id],
-      percent: max[direction.id] > 0 ? (points[direction.id] / max[direction.id]) * 100 : 0,
+      percent: max[direction.id] > 0 ? (profile.points[direction.id] / max[direction.id]) * 100 : 0,
       generalPoints: general[direction.id],
     }))
     .sort((a, b) => b.percent - a.percent || b.generalPoints - a.generalPoints);
@@ -144,29 +305,32 @@ export function evaluate(quiz: Quiz, answers: Answers): Evaluation {
     runnerUp,
     isClose: winner.percent - runnerUp.percent < CLOSE_GAP,
     isWeak: winner.percent < WEAK_PERCENT,
-    reasons: explain(quiz, answers, winner.direction.id),
+    reasons: explain(quiz, effective, winner.direction.id),
+    objects: rankObjects(quiz, profile.preference),
+    profile,
+    inferred,
   };
 }
 
 /** Какие ответы сильнее всего говорят в пользу направления — подсистема объяснений. */
-export function explain(quiz: Quiz, answers: Answers, direction: DirectionId, limit = 5): Reason[] {
+export function explain(quiz: Quiz, effective: Answers, direction: DirectionId, limit = 5): Reason[] {
   const reasons: Reason[] = [];
   for (const question of allQuestions(quiz)) {
-    const chosen = selectedOptions(question, answers).filter((option) => option.weights[direction] > 0);
+    const chosen = selectedOptions(question, effective).filter((option) => weight(option, direction) > 0);
     if (chosen.length === 0) continue;
 
     const template = question.reasonTemplate?.[direction];
     if (template) {
       reasons.push({
         questionId: question.id,
-        points: chosen.reduce((sum, option) => sum + option.weights[direction], 0),
+        points: chosen.reduce((sum, option) => sum + weight(option, direction), 0),
         text: template.replace('{options}', chosen.map((option) => option.short ?? option.text).join(', ')),
       });
       continue;
     }
     for (const option of chosen) {
       const text = option.reasons?.[direction];
-      if (text) reasons.push({ questionId: question.id, points: option.weights[direction], text });
+      if (text) reasons.push({ questionId: question.id, points: weight(option, direction), text });
     }
   }
   // Сначала самые весомые ответы, при равных баллах — в порядке вопросов (сортировка стабильная).

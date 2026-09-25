@@ -1,17 +1,22 @@
 // Состояние приложения: какой экран открыт, на каком вопросе пользователь и что он ответил.
-// Прогресс сохраняется в localStorage, чтобы после перезагрузки можно было продолжить.
+// Ответы — это рабочая база данных экспертной системы; она хранится в localStorage,
+// чтобы после перезагрузки можно было продолжить.
 
 import { useEffect, useReducer } from 'react';
-import { isComplete, toggleOption } from './engine/scoring.ts';
+import { infer, isComplete, toggleOption } from './engine/scoring.ts';
 import type { Answers } from './engine/types.ts';
 import { quiz, steps } from './data.ts';
 
-export type Screen = 'start' | 'quiz' | 'result' | 'credits';
+export type MainScreen = 'start' | 'quiz' | 'result';
+/** Экраны поверх основного: авторы фото, база знаний, рабочая база данных. */
+export type OverlayScreen = 'credits' | 'kb' | 'wm';
+export type Screen = MainScreen | OverlayScreen;
 
 export interface QuizState {
   screen: Screen;
-  /** Куда вернуться со страницы с авторами фото. */
-  returnTo: Exclude<Screen, 'credits'>;
+  /** Куда вернуться с экрана поверх основного. */
+  returnTo: MainScreen;
+  /** Индекс текущего вопроса среди всех вопросов базы знаний. */
   step: number;
   answers: Answers;
 }
@@ -23,18 +28,28 @@ export type QuizAction =
   | { type: 'toggle'; optionId: string }
   | { type: 'next' }
   | { type: 'back' }
-  | { type: 'openCredits' }
-  | { type: 'closeCredits' };
+  | { type: 'open'; screen: OverlayScreen }
+  | { type: 'close' }
+  | { type: 'reset' };
 
-const STORAGE_KEY = 'volunteer-compass/v1';
+const STORAGE_KEY = 'volunteer-orientation/v2';
 const INITIAL: QuizState = { screen: 'start', returnTo: 'start', step: 0, answers: {} };
+
+/** Ближайший вопрос в направлении direction, который задаётся пользователю (не выведен правилом). */
+function nearestAsked(from: number, direction: 1 | -1, answers: Answers): number | null {
+  const { inferred } = infer(quiz, answers);
+  for (let i = from; i >= 0 && i < steps.length; i += direction) {
+    if (!inferred.has(steps[i].question.id)) return i;
+  }
+  return null;
+}
 
 function reducer(state: QuizState, action: QuizAction): QuizState {
   switch (action.type) {
     case 'start':
       return { ...INITIAL, screen: 'quiz' };
     case 'resume':
-      return { ...state, screen: 'quiz' };
+      return { ...state, screen: 'quiz', step: nearestAsked(state.step, 1, state.answers) ?? state.step };
     case 'home':
       return { ...state, screen: 'start' };
     case 'toggle': {
@@ -42,15 +57,27 @@ function reducer(state: QuizState, action: QuizAction): QuizState {
       const selected = toggleOption(question, state.answers[question.id] ?? [], action.optionId);
       return { ...state, answers: { ...state.answers, [question.id]: selected } };
     }
-    case 'next':
-      return state.step < steps.length - 1 ? { ...state, step: state.step + 1 } : { ...state, screen: 'result' };
-    case 'back':
-      return state.step > 0 ? { ...state, step: state.step - 1 } : { ...state, screen: 'start' };
-    case 'openCredits':
-      return state.screen === 'credits' ? state : { ...state, screen: 'credits', returnTo: state.screen };
-    case 'closeCredits':
+    case 'next': {
+      const next = nearestAsked(state.step + 1, 1, state.answers);
+      return next === null ? { ...state, screen: 'result' } : { ...state, step: next };
+    }
+    case 'back': {
+      const previous = nearestAsked(state.step - 1, -1, state.answers);
+      return previous === null ? { ...state, screen: 'start' } : { ...state, step: previous };
+    }
+    case 'open':
+      return state.screen === action.screen
+        ? state
+        : { ...state, screen: action.screen, returnTo: isMain(state.screen) ? state.screen : state.returnTo };
+    case 'close':
       return { ...state, screen: state.returnTo };
+    case 'reset':
+      return { ...INITIAL, screen: state.screen, returnTo: 'start' };
   }
+}
+
+function isMain(screen: Screen): screen is MainScreen {
+  return screen === 'start' || screen === 'quiz' || screen === 'result';
 }
 
 function load(): QuizState {
@@ -58,9 +85,10 @@ function load(): QuizState {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null');
     if (saved && typeof saved.step === 'number' && saved.answers && typeof saved.answers === 'object') {
       const answers: Answers = saved.answers;
-      const step = Math.min(Math.max(0, saved.step), steps.length - 1);
-      // Если после обновления контента старые ответы неполные, показывать результат по ним нельзя.
-      const screen = saved.screen === 'quiz' || (saved.screen === 'result' && isComplete(quiz, answers)) ? saved.screen : 'start';
+      const step = nearestAsked(Math.min(Math.max(0, saved.step), steps.length - 1), 1, answers) ?? 0;
+      // Если после обновления базы знаний старые ответы неполные, показывать результат по ним нельзя.
+      const screen: MainScreen =
+        saved.screen === 'quiz' || (saved.screen === 'result' && isComplete(quiz, answers)) ? saved.screen : 'start';
       return { ...INITIAL, screen, step, answers };
     }
   } catch {
@@ -74,7 +102,7 @@ export function useQuizState() {
 
   useEffect(() => {
     const { step, answers } = state;
-    const screen = state.screen === 'credits' ? state.returnTo : state.screen;
+    const screen = isMain(state.screen) ? state.screen : state.returnTo;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ screen, step, answers }));
     } catch {
