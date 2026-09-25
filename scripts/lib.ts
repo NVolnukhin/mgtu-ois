@@ -1,8 +1,8 @@
 // Общие функции скриптов: загрузка и проверка контента, прогон персон, симуляция случайных ответов.
 
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { DIRECTION_IDS } from '../src/engine/types.ts';
-import type { Answers, DirectionId, Quiz, Weights } from '../src/engine/types.ts';
+import type { Answers, DirectionId, Images, Quiz, Weights } from '../src/engine/types.ts';
 import { allQuestions, evaluate, maxScores, zeroWeights } from '../src/engine/scoring.ts';
 import type { Evaluation } from '../src/engine/scoring.ts';
 import { PERSONAS } from './personas.ts';
@@ -10,6 +10,27 @@ import type { Persona } from './personas.ts';
 
 export function loadQuiz(): Quiz {
   return JSON.parse(readFileSync(new URL('../content/quiz.json', import.meta.url), 'utf8')) as Quiz;
+}
+
+export function loadImages(): Images {
+  return JSON.parse(readFileSync(new URL('../content/images.json', import.meta.url), 'utf8')) as Images;
+}
+
+/** У каждой картинки из квиза есть файл, описание для незрячих и автор с лицензией. */
+export function validateImages(quiz: Quiz, images: Images): string[] {
+  const errors: string[] = [];
+  const used = [quiz.image, ...quiz.directions.map((d) => d.image), ...allQuestions(quiz).map((q) => q.image)];
+  for (const key of used) {
+    if (!images[key]) errors.push(`Картинки «${key}» нет в content/images.json`);
+  }
+  for (const [key, image] of Object.entries(images)) {
+    if (!used.includes(key)) errors.push(`Картинка «${key}» нигде не используется`);
+    if (!existsSync(new URL(`../public/${image.file}`, import.meta.url))) errors.push(`Нет файла public/${image.file}`);
+    if (!image.alt?.trim()) errors.push(`У картинки «${key}» нет описания (alt)`);
+    const { author, source, url, license } = image.credit ?? {};
+    if (!author || !source || !url || !license) errors.push(`У картинки «${key}» не указаны автор, источник или лицензия`);
+  }
+  return errors;
 }
 
 /** Проверяет структуру контента и принципы расстановки весов. Возвращает список ошибок. */

@@ -3,7 +3,7 @@
 
 import { DIRECTION_IDS } from '../src/engine/types.ts';
 import { allQuestions, maxScores } from '../src/engine/scoring.ts';
-import { loadQuiz, percent, runPersonas, simulate, validateQuiz } from './lib.ts';
+import { loadImages, loadQuiz, percent, runPersonas, simulate, validateImages, validateQuiz } from './lib.ts';
 
 /** Допустимая доля побед одного направления на случайных ответах. */
 const FAIR_SHARE = { min: 0.2, max: 0.3 };
@@ -12,7 +12,7 @@ const quiz = loadQuiz();
 const short = Object.fromEntries(quiz.directions.map((d) => [d.id, d.short]));
 let failed = false;
 
-const errors = validateQuiz(quiz);
+const errors = [...validateQuiz(quiz), ...validateImages(quiz, loadImages())];
 const questions = allQuestions(quiz);
 const single = questions.filter((q) => q.type === 'single');
 const situational = single.filter((q) => q.situational).length;

@@ -9,6 +9,7 @@
 | База знаний: вопросы, варианты, веса, фразы-объяснения | [`content/quiz.json`](../content/quiz.json) |
 | Механизм вывода: подсчёт баллов и выбор направления | [`src/engine/scoring.ts`](../src/engine/scoring.ts), функция `evaluate` |
 | Подсистема объяснений: почему направление подходит | там же, функция `explain` |
+| Интерфейс пользователя | React-приложение: [`src/App.tsx`](../src/App.tsx) и [`src/components/`](../src/components) |
 | Проверка базы знаний | [`scripts/check-quiz.ts`](../scripts/check-quiz.ts), результаты — в [validation.md](validation.md) |
 
 Направления: **дети и подростки**, **люди с инвалидностью** (инклюзия), **старшее поколение**, **экология**.

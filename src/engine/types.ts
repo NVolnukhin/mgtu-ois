@@ -16,6 +16,8 @@ export interface Direction {
   /** Короткое название для таблиц и графиков. */
   short: string;
   tagline: string;
+  /** Ключ картинки в content/images.json. */
+  image: string;
   description: string;
   activities: string[];
   qualities: string[];
@@ -41,6 +43,8 @@ export interface Question {
   /** Ситуационная задача: проверяет, как человек поступит в типичной ситуации направления. */
   situational?: boolean;
   text: string;
+  /** Ключ картинки в content/images.json. */
+  image: string;
   /** Обоснование весов — для документации. */
   note: string;
   /**
@@ -66,9 +70,34 @@ export interface Quiz {
   subtitle: string;
   description: string;
   estimatedMinutes: number;
+  /** Ключ картинки для стартового экрана. */
+  image: string;
   directions: Direction[];
   blocks: Block[];
 }
 
 /** Ответы пользователя: id вопроса → id выбранных вариантов. */
 export type Answers = Record<string, string[]>;
+
+export interface ImageCredit {
+  author: string;
+  title: string;
+  /** Сайт, откуда взято фото. */
+  source: string;
+  /** Страница фото на этом сайте. */
+  url: string;
+  license: string;
+  licenseUrl?: string;
+}
+
+/** Фото из content/images.json. */
+export interface ImageInfo {
+  /** Путь относительно папки public. */
+  file: string;
+  alt: string;
+  /** CSS object-position: какую часть кадра сохранить при обрезке. */
+  position: string;
+  credit: ImageCredit;
+}
+
+export type Images = Record<string, ImageInfo>;

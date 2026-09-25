@@ -11,11 +11,16 @@
 | Путь | Что это |
 |---|---|
 | [`content/quiz.json`](content/quiz.json) | База знаний: направления, вопросы, варианты, веса, фразы для объяснения результата |
+| [`content/images.json`](content/images.json) | Фото: файл, описание для незрячих, автор и лицензия |
 | [`src/engine/`](src/engine) | Механизм вывода: подсчёт баллов, выбор направления, объяснение |
+| [`src/`](src) | Интерфейс на React: стартовый экран, вопросы, результат |
+| [`public/images/`](public/images) | Фото из открытых источников, сжатые в WebP |
+| [`DESIGN.md`](DESIGN.md) | Дизайн-система |
 | [`scripts/`](scripts) | Проверка весов и сборка документации |
 | [`docs/methodology.md`](docs/methodology.md) | Как устроены вопросы и почему веса именно такие |
 | [`docs/questions.md`](docs/questions.md), [`docs/questions.csv`](docs/questions.csv) | Все вопросы с весами — для чтения и для Excel |
 | [`docs/validation.md`](docs/validation.md) | Результаты проверки: баланс, тестовые персоны, случайные анкеты |
+| [`docs/credits.md`](docs/credits.md) | Авторы и лицензии фото |
 
 ## Команды
 
@@ -26,13 +31,30 @@ npm install
 ```
 
 ```bash
+npm run dev
+```
+
+Запускает сайт локально с автообновлением.
+
+```bash
+npm run build
+```
+
+Проверяет типы и собирает сайт в `dist/`. Посмотреть сборку — `npm run preview`.
+
+```bash
 npm run check
 ```
 
-Проверяет контент и веса. Если что-то не так, завершается с ошибкой.
+Проверяет контент, веса и картинки. Если что-то не так, завершается с ошибкой.
 
 ```bash
 npm run docs
 ```
 
-Пересобирает `docs/questions.md`, `docs/questions.csv` и `docs/validation.md` после правок в `content/quiz.json`.
+Пересобирает `docs/questions.md`, `docs/questions.csv`, `docs/validation.md` и `docs/credits.md` после правок в `content/`.
+
+## Источники
+
+- Дизайн-система — [`DESIGN.md`](DESIGN.md) из коллекции [VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md) (лицензия MIT), разбор дизайна Airbnb. Вместо закрытого шрифта Airbnb Cereal используется Inter.
+- Фото — Wikimedia Commons и Flickr под свободными лицензиями, авторы перечислены в [`docs/credits.md`](docs/credits.md) и на сайте.

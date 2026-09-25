@@ -1,0 +1,323 @@
+{
+  "hero": {
+    "file": "images/hero.webp",
+    "alt": "Молодые волонтёры в красных футболках делают общее селфи",
+    "position": "50% 35%",
+    "credit": {
+      "author": "Sebastiaan ter Burg",
+      "title": "Wikimania 2014 volunteers take a selfie",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:Wikimania_2014_volunteers_take_a_selfie.jpg",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/"
+    }
+  },
+  "dir-children": {
+    "file": "images/dir-children.webp",
+    "alt": "Вожатая сидит на траве с группой девочек",
+    "position": "50% 20%",
+    "credit": {
+      "author": "saritarobinson",
+      "title": "Picture 600",
+      "source": "Flickr",
+      "url": "https://www.flickr.com/photos/89561950@N00/4304664652",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/"
+    }
+  },
+  "dir-inclusion": {
+    "file": "images/dir-inclusion.webp",
+    "alt": "Три подруги идут по улице, одна из них — на инвалидной коляске",
+    "position": "50% 30%",
+    "credit": {
+      "author": "Disabledandhere",
+      "title": "Disabled BIPOC strolling down street",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:Disabled_BIPOC_strolling_down_street.jpg",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+    }
+  },
+  "dir-seniors": {
+    "file": "images/dir-seniors.webp",
+    "alt": "Волонтёр рисует красками вместе с пожилыми женщинами",
+    "position": "50% 40%",
+    "credit": {
+      "author": "Pictures by Ann",
+      "title": "Sophia Helping Seniors Paint",
+      "source": "Flickr",
+      "url": "https://www.flickr.com/photos/12560758@N07/11219609266",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/"
+    }
+  },
+  "dir-ecology": {
+    "file": "images/dir-ecology.webp",
+    "alt": "Волонтёры сажают саженцы в поле",
+    "position": "50% 40%",
+    "credit": {
+      "author": "Christian Anold Mosha",
+      "title": "DUSAFO planting trees",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:DUSAFO_planting_trees.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+    }
+  },
+  "general-free-day": {
+    "file": "images/general-free-day.webp",
+    "alt": "Двое волонтёров в синих футболках улыбаются",
+    "position": "50% 30%",
+    "credit": {
+      "author": "E mln e",
+      "title": "Volunteers smiling at WIkipedia Day 2026",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:Volunteers_smiling_at_WIkipedia_Day_2026.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+    }
+  },
+  "general-concerns": {
+    "file": "images/general-concerns.webp",
+    "alt": "Разноцветные отпечатки ладоней на белом полотне",
+    "position": "50% 50%",
+    "credit": {
+      "author": "Noah Wulf",
+      "title": "Route 91 \"Helping Hands Healing Heats\" Painting",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:Route_91_%22Helping_Hands_Healing_Heats%22_Painting.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+    }
+  },
+  "general-setting": {
+    "file": "images/general-setting.webp",
+    "alt": "Волонтёрка протягивает стакан воды бегуну в забавном костюме",
+    "position": "50% 40%",
+    "credit": {
+      "author": "U.S. Air Force photo by Senior Airman Natalie Doan",
+      "title": "Frostbite Road Race brings together Team Yokota, local communities (8836648)",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:Frostbite_Road_Race_brings_together_Team_Yokota,_local_communities_(8836648).jpg",
+      "license": "Общественное достояние"
+    }
+  },
+  "general-teamwork": {
+    "file": "images/general-teamwork.webp",
+    "alt": "Руководитель команды волонтёров с рацией раздаёт воду на забеге",
+    "position": "50% 35%",
+    "credit": {
+      "author": "U.S. Air Force photo by Senior Airman Natalie Doan",
+      "title": "Frostbite Road Race brings together Team Yokota, local communities (8836649)",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:Frostbite_Road_Race_brings_together_Team_Yokota,_local_communities_(8836649).jpg",
+      "license": "Общественное достояние"
+    }
+  },
+  "children-experience": {
+    "file": "images/children-experience.webp",
+    "alt": "Вожатый помогает мальчику держать пойманную рыбу",
+    "position": "50% 35%",
+    "credit": {
+      "author": "Ashley Fowler",
+      "title": "Atterbury hosts Kids AT 110712-A-AM585-109",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:Atterbury_hosts_Kids_AT_110712-A-AM585-109.jpg",
+      "license": "Общественное достояние"
+    }
+  },
+  "children-activities": {
+    "file": "images/children-activities.webp",
+    "alt": "Учитель проводит занятие для школьников за общим столом",
+    "position": "50% 40%",
+    "credit": {
+      "author": "Amuzujoe",
+      "title": "Teacher In an Art Class",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:Teacher_In_an_Art_Class.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+    }
+  },
+  "children-situation": {
+    "file": "images/children-situation.webp",
+    "alt": "Парень в шапке сидит на полу и смотрит в телефон",
+    "position": "50% 45%",
+    "credit": {
+      "author": "garryknight",
+      "title": "Texting on a Friday",
+      "source": "Flickr",
+      "url": "https://www.flickr.com/photos/8176740@N05/16666635654",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/"
+    }
+  },
+  "children-commitment": {
+    "file": "images/children-commitment.webp",
+    "alt": "Тренер играет в футбол с малышами",
+    "position": "50% 50%",
+    "credit": {
+      "author": "Staff Sgt. Jes Smith",
+      "title": "Meet Your Mentor Part 2, The Devoted Mother 121030-A-QY605-199",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:Meet_Your_Mentor_Part_2,_The_Devoted_Mother_121030-A-QY605-199.jpg",
+      "license": "Общественное достояние"
+    }
+  },
+  "inclusion-experience": {
+    "file": "images/inclusion-experience.webp",
+    "alt": "Три подруги, одна из них на инвалидной коляске, делают селфи",
+    "position": "50% 25%",
+    "credit": {
+      "author": "Disabledandhere",
+      "title": "Landscape Closeup of Disabled BIPOC Taking a Selfie",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:Landscape_Closeup_of_Disabled_BIPOC_Taking_a_Selfie.jpg",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+    }
+  },
+  "inclusion-skills": {
+    "file": "images/inclusion-skills.webp",
+    "alt": "Люди разговаривают на жестовом языке",
+    "position": "50% 35%",
+    "credit": {
+      "author": "David Fulmer from Pittsburgh",
+      "title": "ASL family",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:ASL_family.jpg",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/"
+    }
+  },
+  "inclusion-situation": {
+    "file": "images/inclusion-situation.webp",
+    "alt": "Незрячий человек с белой тростью переходит улицу по пешеходному переходу",
+    "position": "50% 50%",
+    "credit": {
+      "author": "kenwalton",
+      "title": "Untitled",
+      "source": "Flickr",
+      "url": "https://www.flickr.com/photos/55684318@N00/45012805182",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/"
+    }
+  },
+  "inclusion-readiness": {
+    "file": "images/inclusion-readiness.webp",
+    "alt": "Участники инклюзивного забега, среди них спортсмены на колясках",
+    "position": "50% 50%",
+    "credit": {
+      "author": "Chloetiffanylee",
+      "title": "Special Olympics Sabah in Borneo International Marathon",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:Special_Olympics_Sabah_in_Borneo_International_Marathon.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+    }
+  },
+  "seniors-experience": {
+    "file": "images/seniors-experience.webp",
+    "alt": "Улыбающаяся девочка обнимает бабушку",
+    "position": "50% 35%",
+    "credit": {
+      "author": "Sinchalak Musulmon",
+      "title": "Grandmother and grandchild2",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:Grandmother_and_grandchild2.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+    }
+  },
+  "seniors-help": {
+    "file": "images/seniors-help.webp",
+    "alt": "Волонтёр помогает пожилому мужчине заполнить документы",
+    "position": "50% 40%",
+    "credit": {
+      "author": "Korean Resource Center 민족학교",
+      "title": "Senior Volunteers Elections Training 2012-05-01 (3)",
+      "source": "Flickr",
+      "url": "https://www.flickr.com/photos/53875604@N00/8034630286",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/"
+    }
+  },
+  "seniors-situation": {
+    "file": "images/seniors-situation.webp",
+    "alt": "Пожилой мужчина учится работать за компьютером вместе с помощником",
+    "position": "50% 40%",
+    "credit": {
+      "author": "Knight Foundation",
+      "title": "Knight-Crane Convergence Lab",
+      "source": "Flickr",
+      "url": "https://www.flickr.com/photos/9133668@N08/6242015486",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/"
+    }
+  },
+  "seniors-readiness": {
+    "file": "images/seniors-readiness.webp",
+    "alt": "Руки пожилой женщины за вязанием крючком",
+    "position": "50% 50%",
+    "credit": {
+      "author": "Miluša Snidová",
+      "title": "Details of the hands of an elderly woman crocheting a curtain 01",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:Details_of_the_hands_of_an_elderly_woman_crocheting_a_curtain_01.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+    }
+  },
+  "ecology-habits": {
+    "file": "images/ecology-habits.webp",
+    "alt": "Контейнеры для раздельного сбора отходов: жёлтый, красный и синий",
+    "position": "50% 55%",
+    "credit": {
+      "author": "Terence Ong",
+      "title": "NEA recycling bins, Orchard Road",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:NEA_recycling_bins,_Orchard_Road.JPG",
+      "license": "CC BY 2.5",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.5/"
+    }
+  },
+  "ecology-projects": {
+    "file": "images/ecology-projects.webp",
+    "alt": "Волонтёры с саженцами и инструментами в лесу",
+    "position": "50% 35%",
+    "credit": {
+      "author": "Mount Rainier NPS",
+      "title": "Volunteers work on trail maintenance on the Lakes Trail at Paradise on National Public Lands Day. - 31078850358",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:Volunteers_work_on_trail_maintenance_on_the_Lakes_Trail_at_Paradise_on_National_Public_Lands_Day._-_31078850358.jpg",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/"
+    }
+  },
+  "ecology-situation": {
+    "file": "images/ecology-situation.webp",
+    "alt": "Женщина сортирует пластиковые бутылки в пункте приёма вторсырья",
+    "position": "50% 40%",
+    "credit": {
+      "author": "Alex Proimos from Sydney, Australia",
+      "title": "Recycling Plastic Bottles (7027141171)",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:Recycling_Plastic_Bottles_(7027141171).jpg",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/"
+    }
+  },
+  "ecology-readiness": {
+    "file": "images/ecology-readiness.webp",
+    "alt": "Волонтёры в перчатках собирают мусор на пляже",
+    "position": "50% 50%",
+    "credit": {
+      "author": "Ocean Blue Project, Inc.",
+      "title": "Beach-cleanup-reusable-bags-no-plastic-bags-by-ocean-blue-project",
+      "source": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/wiki/File:Beach-cleanup-reusable-bags-no-plastic-bags-by-ocean-blue-project.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+    }
+  }
+}

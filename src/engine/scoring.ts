@@ -43,6 +43,19 @@ export function selectedOptions(question: Question, answers: Answers): Option[] 
   return question.options.filter((option) => selected.includes(option.id));
 }
 
+/**
+ * Какие варианты будут отмечены после нажатия на optionId. В вопросе с одним ответом
+ * выбор заменяется, с несколькими — переключается; «ничего из этого» снимает остальные
+ * отметки, а любой другой вариант снимает «ничего из этого».
+ */
+export function toggleOption(question: Question, selected: string[], optionId: string): string[] {
+  if (question.type === 'single') return [optionId];
+  if (selected.includes(optionId)) return selected.filter((id) => id !== optionId);
+  const exclusive = new Set(question.options.filter((o) => o.exclusive).map((o) => o.id));
+  if (exclusive.has(optionId)) return [optionId];
+  return [...selected.filter((id) => !exclusive.has(id)), optionId];
+}
+
 export function isComplete(quiz: Quiz, answers: Answers): boolean {
   return allQuestions(quiz).every((question) => selectedOptions(question, answers).length > 0);
 }

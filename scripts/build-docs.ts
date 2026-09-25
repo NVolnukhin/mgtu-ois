@@ -3,7 +3,7 @@
 import { writeFileSync } from 'node:fs';
 import type { Question } from '../src/engine/types.ts';
 import { allQuestions, CLOSE_GAP, maxScores, WEAK_PERCENT } from '../src/engine/scoring.ts';
-import { expectedRandomScores, loadQuiz, percent, runPersonas, simulate, validateQuiz } from './lib.ts';
+import { expectedRandomScores, loadImages, loadQuiz, percent, runPersonas, simulate, validateQuiz } from './lib.ts';
 
 const quiz = loadQuiz();
 const errors = validateQuiz(quiz);
@@ -170,6 +170,28 @@ function validationMarkdown(): string {
   ].join('\n');
 }
 
+/** Авторы и лицензии фото — лицензии CC BY и CC BY-SA требуют их указывать. */
+function creditsMarkdown(): string {
+  const images = loadImages();
+  const escape = (text: string) => text.replaceAll('|', '\\|');
+  return [
+    '# Фотографии',
+    '',
+    generated('`content/images.json`'),
+    '',
+    'Все фото взяты с Wikimedia Commons и Flickr под свободными лицензиями. Для сайта они обрезаны до 3:2, уменьшены и пересжаты в WebP. Фото под CC BY-SA распространяются на тех же условиях.',
+    '',
+    '| Файл | Что на фото | Автор | Лицензия | Источник |',
+    '|---|---|---|---|---|',
+    ...Object.values(images).map(({ file, alt, credit }) => {
+      const license = credit.licenseUrl ? `[${credit.license}](${credit.licenseUrl})` : credit.license;
+      return `| \`${file.replace('images/', '')}\` | ${escape(alt)} | ${escape(credit.author)} | ${license} | [${credit.source}](${credit.url}) |`;
+    }),
+    '',
+  ].join('\n');
+}
+
 write('questions.md', questionsMarkdown());
 write('questions.csv', questionsCsv());
 write('validation.md', validationMarkdown());
+write('credits.md', creditsMarkdown());
