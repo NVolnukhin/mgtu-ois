@@ -54,6 +54,12 @@ npm run docs
 
 Пересобирает `docs/questions.md`, `docs/questions.csv`, `docs/validation.md` и `docs/credits.md` после правок в `content/`.
 
+## Деплой на GitHub Pages
+
+Сайт собирает и выкладывает workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) при каждом пуше в `main`: он ставит зависимости, запускает `npm run check` и `npm run build`. Перед первым пушем Pages нужно один раз включить: **Settings → Pages → Build and deployment → Source: GitHub Actions**. Адрес сайта — `https://nvolnukhin.github.io/mgtu-ois/`.
+
+Пути в сборке относительные (`base: './'` в `vite.config.ts`), поэтому сайт работает и из подпапки Pages, и из любой другой.
+
 ## Источники
 
 - Дизайн-система — [`DESIGN.md`](DESIGN.md) из коллекции [VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md) (лицензия MIT), разбор дизайна Airbnb. Вместо закрытого шрифта Airbnb Cereal используется Inter.
