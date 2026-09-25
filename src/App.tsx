@@ -55,7 +55,10 @@ export function App() {
       </main>
 
       <footer className="footer">
-        <p>Домашнее задание по ОИС · МГТУ им. Н.Э. Баумана</p>
+        <div className="footer__info">
+          <p>Домашнее задание по ОИС · МГТУ им. Н.Э. Баумана</p>
+          <p>Выполнил: Волнухин Никита, СГН3-72Б</p>
+        </div>
         <button type="button" className="footer__link" onClick={() => dispatch({ type: 'openCredits' })}>
           Фото: авторы и лицензии
         </button>

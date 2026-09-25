@@ -50,6 +50,7 @@
   --content-width: 720px;
   --content-width-wide: 1120px;
   --gutter: 16px;
+  --topbar-height: 64px;
 }
 
 @media (min-width: 744px) {

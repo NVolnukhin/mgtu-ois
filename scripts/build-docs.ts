@@ -41,7 +41,7 @@ function questionsMarkdown(): string {
     '',
     generated('`content/quiz.json`'),
     '',
-    `${quiz.subtitle}: ${questions.length} вопросов в ${quiz.blocks.length} блоках. По ответам рекомендуется одно из ${COUNT_GENITIVE[quiz.directions.length] ?? quiz.directions.length} направлений и объясняется, почему оно подходит.`,
+    `Тест из ${questions.length} вопросов в ${quiz.blocks.length} блоках. По ответам рекомендуется одно из ${COUNT_GENITIVE[quiz.directions.length] ?? quiz.directions.length} направлений и объясняется, почему оно подходит.`,
     '',
     '## Как считается направление',
     '',

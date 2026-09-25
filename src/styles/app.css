@@ -226,14 +226,19 @@ a {
   min-height: 100dvh;
 }
 
+/* Шапка закреплена сверху и остаётся на экране при прокрутке. */
 .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-base);
-  min-height: 64px;
+  min-height: var(--topbar-height);
   padding: 0 var(--gutter);
   border-bottom: 1px solid var(--color-hairline);
+  background: var(--color-canvas);
 }
 
 .brand {
@@ -245,19 +250,27 @@ a {
   border: 0;
   border-radius: var(--radius-sm);
   background: transparent;
+  text-align: left;
   cursor: pointer;
 }
 
 .brand__icon {
   display: block;
+  flex: none;
   width: 28px;
   height: 28px;
 }
 
 .brand__name {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   line-height: 1.25;
+}
+
+@media (min-width: 744px) {
+  .brand__name {
+    font-size: 16px;
+  }
 }
 
 .main {
@@ -282,6 +295,11 @@ a {
   color: var(--color-muted);
   font-size: 13px;
   line-height: 1.4;
+}
+
+.footer__info {
+  display: grid;
+  gap: 2px;
 }
 
 .footer__link {
@@ -649,7 +667,7 @@ a {
 
   .question__photo {
     position: sticky;
-    top: var(--space-lg);
+    top: calc(var(--topbar-height) + var(--space-lg));
     aspect-ratio: 4 / 3;
   }
 }
