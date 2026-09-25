@@ -35,7 +35,7 @@ export function QuestionScreen({ step, selected, onToggle, onNext, onBack }: Que
     <form className="question" onSubmit={submit}>
       <Photo key={question.id} name={question.image} className="question__photo" eager />
 
-      <div className="question__content">
+      <div key={question.id} className="question__content">
         <div className="progress">
           <div className="progress__meta">
             <span>
@@ -46,14 +46,21 @@ export function QuestionScreen({ step, selected, onToggle, onNext, onBack }: Que
             </span>
           </div>
           <div
-            className="progress__track"
+            className="progress__blocks"
             role="progressbar"
             aria-label="Пройдено вопросов"
             aria-valuemin={0}
             aria-valuemax={steps.length}
             aria-valuenow={index + 1}
           >
-            <div className="progress__fill" style={{ width: `${((index + 1) / steps.length) * 100}%` }} />
+            {quiz.blocks.map((item, i) => {
+              const done = i < blockIndex ? 1 : i > blockIndex ? 0 : (index - firstStepOf(i) + 1) / item.questions.length;
+              return (
+                <span key={item.id} className="progress__track">
+                  <span className="progress__fill" style={{ width: `${done * 100}%` }} />
+                </span>
+              );
+            })}
           </div>
         </div>
 
@@ -84,6 +91,7 @@ export function QuestionScreen({ step, selected, onToggle, onNext, onBack }: Que
                     onChange={() => onToggle(option.id)}
                   />
                   <span className={`option__mark option__mark--${inputType}`} aria-hidden="true" />
+                  {option.image && <Photo name={option.image} className="option__thumb" eager decorative />}
                   <span className="option__text">{option.text}</span>
                 </label>
               );
@@ -102,4 +110,8 @@ export function QuestionScreen({ step, selected, onToggle, onNext, onBack }: Que
       </div>
     </form>
   );
+}
+
+function firstStepOf(blockIndex: number): number {
+  return steps.findIndex((step) => step.blockIndex === blockIndex);
 }

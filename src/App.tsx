@@ -26,14 +26,10 @@ export function App() {
           <img className="brand__icon" src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" width={28} height={28} />
           <span className="brand__name">{quiz.title}</span>
         </button>
-        {screen === 'quiz' && (
-          <span className="topbar__counter">
-            Вопрос {step + 1} из {steps.length}
-          </span>
-        )}
       </header>
 
-      <main className={screen === 'start' ? 'main main--wide' : screen === 'quiz' ? 'main main--quiz' : 'main'}>
+      {/* key: при смене экрана содержимое монтируется заново и плавно появляется */}
+      <main key={screen} className={screen === 'credits' ? 'main' : 'main main--wide'}>
         {screen === 'start' && (
           <StartScreen
             answered={answered}
@@ -51,7 +47,7 @@ export function App() {
           />
         )}
         {screen === 'result' && evaluation && (
-          <ResultScreen evaluation={evaluation} onRestart={() => dispatch({ type: 'start' })} />
+          <ResultScreen evaluation={evaluation} answers={answers} onRestart={() => dispatch({ type: 'start' })} />
         )}
         {screen === 'credits' && <CreditsScreen onClose={() => dispatch({ type: 'closeCredits' })} />}
       </main>

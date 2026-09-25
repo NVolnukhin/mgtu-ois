@@ -70,12 +70,36 @@ a {
 /* ---------- Общие элементы ---------- */
 
 .photo {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-strong);
+}
+
+.photo__img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: cover;
-  background: var(--color-surface-strong);
-  border-radius: var(--radius-md);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.photo__img--loaded {
+  opacity: 1;
+}
+
+/* Экраны и вопросы появляются плавно, без резкой подмены. */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.main > * {
+  animation: fade-up 0.35s ease both;
 }
 
 .eyebrow {
@@ -236,13 +260,6 @@ a {
   line-height: 1.25;
 }
 
-.topbar__counter {
-  color: var(--color-muted);
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
 .main {
   flex: 1;
   width: 100%;
@@ -251,8 +268,7 @@ a {
   padding: var(--space-lg) var(--gutter) var(--space-xxl);
 }
 
-.main--wide,
-.main--quiz {
+.main--wide {
   max-width: calc(var(--content-width-wide) + 2 * var(--gutter));
 }
 
@@ -434,7 +450,13 @@ a {
   font-weight: 500;
 }
 
+.progress__blocks {
+  display: flex;
+  gap: var(--space-xs);
+}
+
 .progress__track {
+  flex: 1;
   height: 4px;
   overflow: hidden;
   border-radius: var(--radius-full);
@@ -442,10 +464,15 @@ a {
 }
 
 .progress__fill {
+  display: block;
   height: 100%;
   border-radius: inherit;
   background: var(--color-ink);
   transition: width 0.3s ease;
+}
+
+.question__content {
+  animation: fade-up 0.3s ease both;
 }
 
 .question__content .badges {
@@ -556,6 +583,20 @@ a {
   transform: rotate(-45deg);
 }
 
+.option__thumb {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+}
+
+@media (min-width: 744px) {
+  .option__thumb {
+    width: 56px;
+    height: 56px;
+  }
+}
+
 .option__text {
   font-size: 16px;
   line-height: 1.4;
@@ -615,8 +656,9 @@ a {
 
 /* ---------- Результат ---------- */
 
-.result {
+.result__hero {
   display: grid;
+  gap: var(--space-lg);
 }
 
 .result__title {
@@ -634,8 +676,18 @@ a {
 }
 
 .result__photo {
-  margin-top: var(--space-lg);
+  order: -1;
   aspect-ratio: 16 / 9;
+}
+
+.result__body {
+  display: grid;
+}
+
+.panel {
+  padding: var(--space-lg);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-float);
 }
 
 .score {
@@ -693,7 +745,7 @@ a {
   width: 22px;
   height: 22px;
   border-radius: var(--radius-full);
-  background: var(--color-primary);
+  background: var(--color-ink);
 }
 
 .reasons li::after {
@@ -703,8 +755,8 @@ a {
   left: 6px;
   width: 10px;
   height: 5px;
-  border-bottom: 2px solid var(--color-on-primary);
-  border-left: 2px solid var(--color-on-primary);
+  border-bottom: 2px solid var(--color-canvas);
+  border-left: 2px solid var(--color-canvas);
   transform: rotate(-45deg);
 }
 
@@ -811,6 +863,14 @@ a {
   height: 100%;
   border-radius: inherit;
   background: var(--color-ink);
+  transform-origin: left;
+  animation: grow 0.8s 0.2s ease both;
+}
+
+@keyframes grow {
+  from {
+    transform: scaleX(0);
+  }
 }
 
 .bar--winner .bar__label {
@@ -821,19 +881,118 @@ a {
   background: var(--color-primary);
 }
 
+/* Подробный расчёт */
+.details {
+  margin-top: var(--space-lg);
+  border-top: 1px solid var(--color-hairline);
+}
+
+.details__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding-top: var(--space-md);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.details__summary::-webkit-details-marker {
+  display: none;
+}
+
+.details__summary::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  margin-right: 4px;
+  border-right: 2px solid var(--color-ink);
+  border-bottom: 2px solid var(--color-ink);
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.details[open] .details__summary::after {
+  transform: rotate(-135deg);
+}
+
+.details__text {
+  margin-top: var(--space-sm);
+  color: var(--color-body);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.breakdown {
+  display: grid;
+  margin-top: var(--space-base);
+  list-style: none;
+}
+
+.breakdown__item {
+  padding: var(--space-md) 0;
+  border-top: 1px solid var(--color-hairline-soft);
+}
+
+.breakdown__question {
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.breakdown__answer {
+  margin-top: var(--space-xs);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.breakdown__points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: 6px;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.point {
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-strong);
+  color: var(--color-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.point--winner {
+  background: var(--color-ink);
+  color: var(--color-canvas);
+}
+
 @media (min-width: 744px) {
   .result__title {
     font-size: 36px;
     letter-spacing: -0.8px;
   }
+}
 
-  .bar {
-    grid-template-areas: 'label track value';
-    grid-template-columns: 220px minmax(0, 1fr) 56px;
+@media (min-width: 960px) {
+  .result__hero {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: var(--space-xxl);
+    align-items: center;
   }
 
-  .bar__value {
-    text-align: right;
+  .result__photo {
+    order: 0;
+    aspect-ratio: 4 / 3;
+  }
+
+  .result__body {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: var(--space-xxl);
+    align-items: start;
   }
 }
 
@@ -890,6 +1049,7 @@ a {
   *,
   *::before,
   *::after {
+    animation: none !important;
     transition-duration: 0.01ms !important;
   }
 }

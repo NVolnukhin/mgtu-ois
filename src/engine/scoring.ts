@@ -73,6 +73,24 @@ export function scoreAnswers(quiz: Quiz, answers: Answers, blocks = quiz.blocks)
   return score;
 }
 
+export interface QuestionBreakdown {
+  question: Question;
+  selected: Option[];
+  points: Weights;
+}
+
+/** Сколько баллов каждый ответ дал каждому направлению — для подробного расчёта на экране результата. */
+export function breakdown(quiz: Quiz, answers: Answers): QuestionBreakdown[] {
+  return allQuestions(quiz).map((question) => {
+    const selected = selectedOptions(question, answers);
+    const points = zeroWeights();
+    for (const option of selected) {
+      for (const id of DIRECTION_IDS) points[id] += option.weights[id];
+    }
+    return { question, selected, points };
+  });
+}
+
 export interface DirectionScore {
   direction: Direction;
   points: number;

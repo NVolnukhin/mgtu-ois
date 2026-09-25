@@ -35,6 +35,8 @@ export interface Option {
   reasons?: Partial<Record<DirectionId, string>>;
   /** «Ничего из этого»: снимает остальные отметки и сам снимается при выборе другого варианта. */
   exclusive?: boolean;
+  /** Ключ картинки-превью в content/images.json. */
+  image?: string;
 }
 
 export interface Question {

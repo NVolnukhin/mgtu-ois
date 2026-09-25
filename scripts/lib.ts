@@ -19,7 +19,11 @@ export function loadImages(): Images {
 /** У каждой картинки из квиза есть файл, описание для незрячих и автор с лицензией. */
 export function validateImages(quiz: Quiz, images: Images): string[] {
   const errors: string[] = [];
-  const used = [quiz.image, ...quiz.directions.map((d) => d.image), ...allQuestions(quiz).map((q) => q.image)];
+  const used = [
+    quiz.image,
+    ...quiz.directions.map((d) => d.image),
+    ...allQuestions(quiz).flatMap((q) => [q.image, ...q.options.flatMap((o) => (o.image ? [o.image] : []))]),
+  ];
   for (const key of used) {
     if (!images[key]) errors.push(`Картинки «${key}» нет в content/images.json`);
   }
