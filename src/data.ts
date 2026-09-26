@@ -27,10 +27,9 @@ export function image(key: string): ImageInfo & { src: string } {
   return { ...info, src: `${import.meta.env.BASE_URL}${info.file}` };
 }
 
-/** Процент со знаком для совпадений и предпочтений: «72 %», «−15 %». */
-export function signedPercent(value: number): string {
-  const rounded = Math.round(value * 100);
-  return `${rounded < 0 ? '−' : ''}${Math.abs(rounded)} %`;
+/** Доля от 0 до 1 в процентах: 0,724 → «72 %». */
+export function percent(value: number): string {
+  return `${Math.round(value * 100)} %`;
 }
 
 /**

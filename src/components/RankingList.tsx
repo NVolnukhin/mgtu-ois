@@ -1,5 +1,5 @@
 import type { ObjectScore } from '../engine/scoring.ts';
-import { directionById, signedPercent } from '../data.ts';
+import { directionById, percent } from '../data.ts';
 
 interface RankingListProps {
   items: ObjectScore[];
@@ -16,17 +16,18 @@ export function RankingList({ items, previous, compact = false }: RankingListPro
         const before = previous?.get(item.object.id);
         const shift = before ? before - item.rank : 0;
         return (
-          <li key={item.object.id} className={item.score > 0 ? 'ranking__item' : 'ranking__item ranking__item--weak'}>
+          // Совпадение ниже 50 % — деятельность скорее противоречит ответам, показываем её приглушённо.
+          <li key={item.object.id} className={item.score >= 0.5 ? 'ranking__item' : 'ranking__item ranking__item--weak'}>
             <span className="ranking__rank">{item.rank}</span>
             <span className="ranking__body">
               <span className="ranking__title">{item.object.title}</span>
               <span className="ranking__meta">{directionById[item.object.direction].title}</span>
               <span className="ranking__track" aria-hidden="true">
-                <span className="ranking__fill" style={{ width: `${Math.max(0, item.score) * 100}%` }} />
+                <span className="ranking__fill" style={{ width: `${item.score * 100}%` }} />
               </span>
             </span>
             <span className="ranking__side">
-              <span className="ranking__score">{signedPercent(item.score)}</span>
+              <span className="ranking__score">{percent(item.score)}</span>
               {shift !== 0 && (
                 <span
                   className={shift > 0 ? 'shift shift--up' : 'shift shift--down'}

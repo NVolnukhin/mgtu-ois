@@ -3,7 +3,7 @@ import { breakdown, SPHERE_WEIGHT } from '../engine/scoring.ts';
 import type { Evaluation, ObjectScore } from '../engine/scoring.ts';
 import { ATTRIBUTE_IDS } from '../engine/types.ts';
 import type { Answers } from '../engine/types.ts';
-import { attributeById, directionById, preferencePercent, quiz, signedPercent } from '../data.ts';
+import { attributeById, directionById, percent, preferencePercent, quiz } from '../data.ts';
 import { Photo } from './Photo.tsx';
 import { RankingList } from './RankingList.tsx';
 
@@ -62,6 +62,12 @@ export function ResultScreen({ evaluation, answers, onRestart, onOpenWorkingMemo
 
       <section className="section">
         <h2 className="section__title">Лучше всего тебе подходят</h2>
+        {objects[0].score < 0.5 && (
+          <p className="section__lead">
+            По твоим ответам ни один вид деятельности не набрал и 50 % совпадения — это лучшие из имеющихся. Попробуй
+            их на разовых акциях, чтобы понять, что откликается.
+          </p>
+        )}
         <ol className="top-cards">
           {objects.slice(0, 3).map((item) => (
             <TopCard key={item.object.id} item={item} />
@@ -85,7 +91,8 @@ export function ResultScreen({ evaluation, answers, onRestart, onOpenWorkingMemo
           <section className="section">
             <h2 className="section__title">Все виды деятельности по рангу</h2>
             <p className="section__lead">
-              Совпадение — это сходство твоего профиля предпочтений с профилем деятельности, от −100 % до 100 %.
+              Совпадение — это сходство твоего профиля предпочтений с профилем деятельности: 100 % — деятельность
+              ровно такая, как ты хочешь, 50 % — никак не связана с твоими ответами, ниже 50 % — скорее им противоречит.
             </p>
             <RankingList items={objects} />
           </section>
@@ -137,8 +144,9 @@ export function ResultScreen({ evaluation, answers, onRestart, onOpenWorkingMemo
                 </p>
                 <p>
                   Профиль сравнивается с атрибутами каждого из {quiz.objects.length} видов деятельности (косинусная мера
-                  сходства, сферы с весом {SPHERE_WEIGHT}) — так получается рейтинг. Направленность — это сфера, по которой
-                  набрано больше всего баллов из {winner.max} возможных.
+                  сходства, сферы с весом {SPHERE_WEIGHT}) и переводится в совпадение от 0 до 100 %: 50 % — деятельность
+                  не связана с ответами. Так получается рейтинг. Направленность — это сфера, по которой набрано больше
+                  всего баллов из {winner.max} возможных.
                 </p>
               </div>
               <button type="button" className="text-button" onClick={onOpenWorkingMemory}>
@@ -196,7 +204,7 @@ function TopCard({ item }: { item: ObjectScore }) {
     <li className="top-card">
       <div className="top-card__head">
         <span className="top-card__rank">{item.rank}</span>
-        <span className="top-card__score">{signedPercent(item.score)}</span>
+        <span className="top-card__score">{percent(item.score)}</span>
       </div>
       <h3 className="top-card__title">{item.object.title}</h3>
       <p className="top-card__direction">{directionById[item.object.direction].title}</p>

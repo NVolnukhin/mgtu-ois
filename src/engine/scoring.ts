@@ -162,13 +162,18 @@ export interface Contribution {
   level: number;
   /** Предпочтение пользователя по атрибуту, от −1 до 1. */
   preference: number;
-  /** Вклад атрибута в совпадение; сумма вкладов равна совпадению. */
+  /** Вклад атрибута в косинус: положительный — атрибут совпал с предпочтениями, отрицательный — противоречит им. */
   value: number;
 }
 
 export interface ObjectScore {
   object: VolunteerObject;
-  /** Совпадение от −1 до 1 — косинус угла между профилем пользователя и атрибутами объекта. */
+  /** Косинус угла между профилем пользователя и атрибутами объекта, от −1 до 1. */
+  cosine: number;
+  /**
+   * Совпадение от 0 до 1: (1 + cosine) / 2. 1 — деятельность в точности такая, как хочет пользователь,
+   * 0,5 — не связана с его предпочтениями, меньше 0,5 — её свойства скорее противоречат ответам.
+   */
   score: number;
   /** Место в рейтинге, начиная с 1. */
   rank: number;
@@ -181,10 +186,10 @@ export function attributeWeight(quiz: Quiz, id: AttributeId): number {
 }
 
 /**
- * Совпадение объекта с профилем — косинусная мера сходства векторов: предпочтений пользователя
- * (от −1 до 1) и выраженности атрибутов объекта (от 0 до 3), где сферы идут с весом SPHERE_WEIGHT.
- * 1 — профиль деятельности в точности повторяет предпочтения, 0 — не связан с ними,
- * отрицательное значение — свойства деятельности противоречат ответам.
+ * Совпадение объекта с профилем. Сначала считается косинусная мера сходства векторов: предпочтений
+ * пользователя (от −1 до 1) и выраженности атрибутов объекта (от 0 до 3), где сферы идут с весом
+ * SPHERE_WEIGHT. Косинус лежит от −1 до 1, поэтому для показа он переводится в шкалу от 0 до 1:
+ * (1 + cosine) / 2. Перевод линейный, так что порядок объектов от него не зависит.
  */
 export function rankObjects(quiz: Quiz, preference: AttributeValues): ObjectScore[] {
   const w = Object.fromEntries(ATTRIBUTE_IDS.map((id) => [id, attributeWeight(quiz, id)])) as AttributeValues;
@@ -198,9 +203,9 @@ export function rankObjects(quiz: Quiz, preference: AttributeValues): ObjectScor
       preference: preference[id],
       value: norm > 0 ? (w[id] * preference[id] * object.attributes[id]) / norm : 0,
     }));
-    const score = contributions.reduce((sum, c) => sum + c.value, 0);
+    const cosine = contributions.reduce((sum, c) => sum + c.value, 0);
     contributions.sort((a, b) => b.value - a.value);
-    return { object, score, rank: 0, contributions };
+    return { object, cosine, score: (1 + cosine) / 2, rank: 0, contributions };
   });
   // При равенстве остаётся порядок объектов в базе знаний (сортировка стабильная).
   scored.sort((a, b) => b.score - a.score);
